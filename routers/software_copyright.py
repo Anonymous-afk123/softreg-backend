@@ -37,27 +37,28 @@ def create_form(body: CreateFormBody):
         "status": "draft",
     }
 
-    result = (
-        client.table("software_copyright_forms")
-        .insert(insert_data)
-        .select()
-        .execute()
-    )
-
-    if not result.data:
-        # 兼容未执行迁移、无 status 列的库
-        insert_data.pop("status", None)
-        result = (
-            client.table("software_copyright_forms")
-            .insert(insert_data)
-            .select()
-            .execute()
-        )
-
-    if not result.data:
-        raise HTTPException(status_code=500, detail="创建失败")
-
-    return ApiResponse(code=200, msg="创建成功", data=result.data[0])
+    try:
+        # 先执行插入
+        result = client.table("software_copyright_forms").insert(insert_data).execute()
+        
+        if not result.data:
+            # 兼容未执行迁移、无 status 列的库
+            insert_data.pop("status", None)
+            result = client.table("software_copyright_forms").insert(insert_data).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=500, detail="创建失败")
+        
+        # 获取刚插入的数据
+        inserted_id = result.data[0]["id"]
+        query_result = client.table("software_copyright_forms").select("*").eq("id", inserted_id).execute()
+        
+        if query_result.data:
+            return ApiResponse(code=200, msg="创建成功", data=query_result.data[0])
+        return ApiResponse(code=200, msg="创建成功", data=result.data[0])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"创建失败: {str(e)}")
 
 
 @router.get("/forms")
