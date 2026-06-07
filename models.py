@@ -17,26 +17,26 @@ class WechatLoginBody(BaseModel):
 
 class CreateFormBody(BaseModel):
     user_id: str
-    software_full_name: str
+    software_full_name: Optional[str] = None
     software_short_name: Optional[str] = None
-    version: str
-    software_category: str
-    development_date: str
-    is_published: bool = False
-    development_hardware: str
-    runtime_hardware: str
-    development_os: str
-    development_tools: str
-    runtime_platform: str
-    runtime_environment: str
-    programming_language: str
-    source_code_lines: int
-    development_purpose: str
-    target_industry: str
-    main_functions: str
-    technical_features: str
-    company_name: str
-    credit_code: str
+    version: Optional[str] = None
+    software_category: Optional[str] = None
+    development_date: Optional[str] = None
+    is_published: Optional[bool] = False
+    development_hardware: Optional[str] = None
+    runtime_hardware: Optional[str] = None
+    development_os: Optional[str] = None
+    development_tools: Optional[str] = None
+    runtime_platform: Optional[str] = None
+    runtime_environment: Optional[str] = None
+    programming_language: Optional[str] = None
+    source_code_lines: Optional[int] = None
+    development_purpose: Optional[str] = None
+    target_industry: Optional[str] = None
+    main_functions: Optional[str] = None
+    technical_features: Optional[str] = None
+    company_name: Optional[str] = None
+    credit_code: Optional[str] = None
 
 
 class UpdateFormBody(BaseModel):
