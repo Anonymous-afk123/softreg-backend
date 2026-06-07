@@ -125,29 +125,38 @@ def update_form(form_id: str, body: UpdateFormBody):
 
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
 
-    result = (
+    # 执行更新（不使用 .select() 链）
+    update_result = (
         client.table("software_copyright_forms")
         .update(updates)
         .eq("id", form_id)
-        .select()
         .execute()
     )
 
-    if not result.data:
+    if not update_result.data:
         updates.pop("enriched_data", None)
         updates.pop("status", None)
-        result = (
+        update_result = (
             client.table("software_copyright_forms")
             .update(updates)
             .eq("id", form_id)
-            .select()
             .execute()
         )
 
-    if not result.data:
+    if not update_result.data:
         raise HTTPException(status_code=500, detail="更新失败")
 
-    return ApiResponse(code=200, msg="更新成功", data=_row_response(result.data[0]))
+    # 更新成功后单独查询获取完整数据
+    query_result = (
+        client.table("software_copyright_forms")
+        .select("*")
+        .eq("id", form_id)
+        .execute()
+    )
+
+    if query_result.data:
+        return ApiResponse(code=200, msg="更新成功", data=_row_response(query_result.data[0]))
+    return ApiResponse(code=200, msg="更新成功", data=_row_response(update_result.data[0]))
 
 
 @router.delete("/form/{form_id}")
